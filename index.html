@@ -1,0 +1,883 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>MoneyTrack</title>
+<style>
+:root {
+  --primary:#2563eb;
+  --bg:#f1f5f9;
+  --card:#ffffff;
+  --text:#172033;
+  --muted:#64748b;
+  --border:#e2e8f0;
+  --green:#16a34a;
+  --red:#dc2626;
+}
+*{box-sizing:border-box}
+body{
+  margin:0;background:var(--bg);color:var(--text);
+  font-family:Arial,sans-serif;line-height:1.5
+}
+body.dark{
+  --bg:#0f172a;--card:#1e293b;
+  --text:#f8fafc;--muted:#cbd5e1;--border:#334155
+}
+.container{max-width:1050px;margin:auto;padding:16px}
+.hidden{display:none!important}
+.card{
+  background:var(--card);padding:20px;border-radius:15px;
+  border:1px solid var(--border);margin-bottom:16px
+}
+h1,h2,h3{margin-top:0}
+h1{font-size:28px}
+h2{font-size:21px}
+p{color:var(--muted)}
+label{display:block;font-weight:bold;margin:10px 0 5px}
+input,select{
+  width:100%;padding:12px;border:1px solid var(--border);
+  border-radius:9px;background:var(--card);color:var(--text);
+  font-size:16px;min-height:44px
+}
+button{
+  border:0;border-radius:9px;background:var(--primary);
+  color:white;padding:12px 15px;font-weight:bold;
+  min-height:42px;cursor:pointer
+}
+button.secondary{background:#e2e8f0;color:#172033}
+button.danger{background:var(--red)}
+button.small{padding:7px 10px;min-height:34px;font-size:12px}
+button:active{opacity:.8}
+.login{max-width:430px;margin:35px auto}
+.brand{text-align:center;margin:30px 0}
+.logo{
+  width:70px;height:70px;border-radius:20px;background:var(--primary);
+  color:white;font-size:35px;font-weight:bold;
+  display:grid;place-items:center;margin:auto
+}
+.brand h1{color:var(--primary);margin:12px 0}
+.full{width:100%;margin-top:12px}
+.topbar{
+  display:flex;justify-content:space-between;
+  align-items:center;gap:12px;flex-wrap:wrap
+}
+.topbar h1{color:var(--primary);margin-bottom:0}
+.nav{
+  display:flex;gap:8px;overflow-x:auto;padding:10px 0;
+  position:sticky;top:0;background:var(--bg);z-index:5
+}
+.nav button{flex-shrink:0}
+.nav button.active{background:#0f172a}
+.grid{
+  display:grid;grid-template-columns:repeat(2,minmax(0,1fr));
+  gap:12px
+}
+.stat{font-size:25px;font-weight:bold}
+.green{color:var(--green)}
+.red{color:var(--red)}
+.muted{color:var(--muted)}
+.actions{display:flex;gap:7px;flex-wrap:wrap;margin-top:10px}
+.progress{
+  height:12px;background:var(--border);
+  border-radius:20px;overflow:hidden;margin:10px 0
+}
+.progress-fill{height:100%;background:var(--green);width:0}
+.notice{
+  padding:13px;border-radius:9px;background:#fef3c7;
+  color:#854d0e;margin:10px 0
+}
+.table-wrap{overflow-x:auto}
+table{width:100%;border-collapse:collapse;min-width:600px}
+th,td{
+  padding:10px;text-align:left;border-bottom:1px solid var(--border);
+  font-size:13px
+}
+th{color:var(--muted)}
+.bar-track{
+  height:12px;background:var(--border);
+  border-radius:20px;overflow:hidden
+}
+.bar-fill{height:100%;background:var(--primary)}
+.bar-row{margin:12px 0}
+.empty{text-align:center;padding:18px;color:var(--muted)}
+footer{text-align:center;padding:20px;color:var(--muted);font-size:12px}
+@media(max-width:600px){
+  .container{padding:10px}
+  .card{padding:15px}
+  .grid{gap:8px}
+  .grid .card{padding:12px}
+  .stat{font-size:19px}
+  .topbar{align-items:flex-start}
+}
+</style>
+</head>
+<body>
+<main class="container">
+
+<section id="authSection">
+  <div class="login">
+    <div class="brand">
+      <div class="logo">₦</div>
+      <h1>MoneyTrack</h1>
+      <p>Manage your money. Build your future.</p>
+    </div>
+    <div class="card">
+      <h2 id="authTitle">Welcome back</h2>
+      <form id="authForm">
+        <label>Email</label>
+        <input id="email" type="email" required placeholder="demo@example.com">
+        <label>Password</label>
+        <input id="password" type="password" required placeholder="Demo password">
+        <button class="full" id="authButton">Log In</button>
+      </form>
+      <button class="full secondary" id="toggleAuth" type="button">
+        Create demo account
+      </button>
+      <p id="authMessage"></p>
+      <p class="muted">Educational demo only. Do not use real passwords or bank details.</p>
+    </div>
+  </div>
+</section>
+
+<section id="appSection" class="hidden">
+
+<header class="topbar">
+  <div>
+    <h1>MoneyTrack</h1>
+    <p>Welcome, <span id="welcomeName">User</span></p>
+  </div>
+  <div class="actions">
+    <button class="secondary" id="themeButton">Dark mode</button>
+    <button class="danger" id="logoutButton">Log Out</button>
+  </div>
+</header>
+
+<nav class="nav">
+  <button class="active" data-page="dashboard">Dashboard</button>
+  <button data-page="transactions">Transactions</button>
+  <button data-page="savings">Savings</button>
+  <button data-page="budget">Budget</button>
+  <button data-page="reports">Reports</button>
+  <button data-page="settings">Settings</button>
+</nav>
+
+<section id="dashboardPage" class="page">
+  <div class="grid">
+    <div class="card"><p>Total Income</p><div class="stat green" id="totalIncome">₦0</div></div>
+    <div class="card"><p>Total Expenses</p><div class="stat red" id="totalExpenses">₦0</div></div>
+    <div class="card"><p>Available Balance</p><div class="stat" id="balance">₦0</div></div>
+    <div class="card"><p>Total Savings</p><div class="stat" id="totalSavings">₦0</div></div>
+  </div>
+
+  <div class="card">
+    <h2>Financial Health</h2>
+    <p id="financialHealth">Add transactions to see your summary.</p>
+  </div>
+
+  <div class="card">
+    <h2>Recent Activity</h2>
+    <div id="recentActivity"></div>
+  </div>
+
+  <div class="card">
+    <h2>Monthly Summary</h2>
+    <p id="monthlySummary"></p>
+  </div>
+</section>
+
+<section id="transactionsPage" class="page hidden">
+  <div class="card">
+    <h2 id="formTitle">Add Transaction</h2>
+    <form id="transactionForm">
+      <input type="hidden" id="editId">
+      <label>Transaction Type</label>
+      <select id="type">
+        <option value="income">Income</option>
+        <option value="expense">Expense</option>
+      </select>
+      <label>Amount (₦)</label>
+      <input id="amount" type="number" min="0.01" step="0.01" required>
+      <label>Category</label>
+      <select id="category">
+        <option>Salary</option><option>Business</option>
+        <option>Food</option><option>Transport</option>
+        <option>Shopping</option><option>Bills</option>
+        <option>Education</option><option>Health</option>
+        <option>Other</option>
+      </select>
+      <label>Date</label>
+      <input id="date" type="date" required>
+      <label>Description</label>
+      <input id="note" type="text" placeholder="Description">
+      <button class="full" type="submit">Save Transaction</button>
+      <button class="full secondary" id="cancelEdit" type="button">Cancel Edit</button>
+    </form>
+  </div>
+
+  <div class="card">
+    <h2>Transaction History</h2>
+    <label>Search</label>
+    <input id="search" type="search" placeholder="Search transactions">
+    <label>Filter by type</label>
+    <select id="filterType">
+      <option value="all">All types</option>
+      <option value="income">Income</option>
+      <option value="expense">Expenses</option>
+    </select>
+    <label>Filter by category</label>
+    <select id="filterCategory">
+      <option value="all">All categories</option>
+      <option>Salary</option><option>Business</option>
+      <option>Food</option><option>Transport</option>
+      <option>Shopping</option><option>Bills</option>
+      <option>Education</option><option>Health</option><option>Other</option>
+    </select>
+    <label>From date</label>
+    <input id="fromDate" type="date">
+    <label>To date</label>
+    <input id="toDate" type="date">
+    <button class="secondary full" id="clearFilters" type="button">Clear Filters</button>
+    <div class="table-wrap">
+      <table>
+        <thead>
+          <tr><th>Date</th><th>Type</th><th>Category</th><th>Amount</th><th>Description</th><th>Actions</th></tr>
+        </thead>
+        <tbody id="transactionList"></tbody>
+      </table>
+    </div>
+    <div id="transactionEmpty" class="empty">No transactions found.</div>
+    <button id="exportButton" class="full">Export CSV</button>
+  </div>
+</section>
+
+<section id="savingsPage" class="page hidden">
+  <div class="card">
+    <h2>Create Savings Goal</h2>
+    <form id="savingsForm">
+      <label>Goal name</label>
+      <input id="savingName" required placeholder="e.g. New phone">
+      <label>Target amount (₦)</label>
+      <input id="savingTarget" type="number" min="1" required>
+      <label>Initial savings (₦)</label>
+      <input id="savingAmount" type="number" min="0" value="0">
+      <button class="full">Create Goal</button>
+    </form>
+  </div>
+  <div id="savingsList"></div>
+</section>
+
+<section id="budgetPage" class="page hidden">
+  <div class="card">
+    <h2>Monthly Budget</h2>
+    <form id="budgetForm">
+      <label>Budget amount (₦)</label>
+      <input id="budgetAmount" type="number" min="1" required>
+      <button class="full">Save Budget</button>
+    </form>
+    <h3 id="budgetStatus">No budget set.</h3>
+    <div class="progress"><div id="budgetProgress" class="progress-fill"></div></div>
+    <p id="budgetDetails"></p>
+  </div>
+</section>
+
+<section id="reportsPage" class="page hidden">
+  <div class="card">
+    <h2>Financial Reports</h2>
+    <p id="reportSummary"></p>
+    <h3>Expenses by Category</h3>
+    <div id="categoryChart"></div>
+    <h3>Income vs Expenses</h3>
+    <div id="comparisonChart"></div>
+  </div>
+</section>
+<section id="settingsPage" class="page hidden">
+  <div class="card">
+    <h2>Profile Settings</h2>
+    <form id="profileForm">
+      <label>Your name</label>
+      <input id="profileName" required>
+      <label>Email</label>
+      <input id="profileEmail" type="email" disabled>
+      <button class="full">Save Profile</button>
+    </form>
+  </div>
+
+  <div class="card">
+    <h2>Backup Your Data</h2>
+    <p>Download a backup of your MoneyTrack demo data.</p>
+    <button class="full" id="backupButton">Download Backup</button>
+    <label>Restore from backup file</label>
+    <input type="file" id="restoreFile" accept=".json,application/json">
+    <button class="full" id="restoreButton">Restore Backup</button>
+    <p class="muted">Only restore a backup file you trust. Restoring replaces your current demo data.</p>
+  </div>
+
+  <div class="card">
+    <h2>Notifications</h2>
+    <p id="notificationMessage">MoneyTrack demo notifications are ready.</p>
+    <button class="full" id="notificationButton">Test Notification</button>
+  </div>
+
+  <div class="card">
+    <h2>Security Reminder</h2>
+    <div class="notice">
+      Never enter your bank PIN, OTP, card details or real passwords in this demo.
+    </div>
+  </div>
+
+  <div class="card">
+    <h2>Privacy Notice</h2>
+    <p>Your demo information is stored in this browser on this device. It is not a secure banking service.</p>
+  </div>
+
+  <div class="card">
+    <h2>Publishing Preparation</h2>
+    <p>Before publishing a real finance application, you need secure authentication, a protected database, HTTPS, privacy information and proper testing.</p>
+    <p>This project is currently a front-end educational demo.</p>
+  </div>
+
+  <div class="card">
+    <h2>About MoneyTrack</h2>
+    <p>Personal Finance Tracking Learning Project.</p>
+    <p>Lessons 1–30.</p>
+  </div>
+</section>
+
+</section>
+</main>
+
+<footer>MoneyTrack • Lessons 1–30 • Educational Project</footer>
+
+<script>
+const $ = id => document.getElementById(id);
+let currentUser = null;
+let transactions = [];
+let savings = [];
+let budget = 0;
+let editingId = null;
+let registering = false;
+
+const money = value => new Intl.NumberFormat("en-NG", {
+  style:"currency",currency:"NGN"
+}).format(Number(value)||0);
+
+const today = () => {
+  const d = new Date();
+  return new Date(d.getTime()-d.getTimezoneOffset()*60000)
+    .toISOString().slice(0,10);
+};
+
+function escapeHTML(value) {
+  return String(value).replace(/[&<>"']/g, c => ({
+    "&":"&amp;","<":"&lt;",">":"&gt;",
+    '"':"&quot;","'":"&#039;"
+  })[c]);
+}
+
+function getUsers() {
+  return JSON.parse(localStorage.getItem("mtUsers")||"[]");
+}
+
+function saveUsers(users) {
+  localStorage.setItem("mtUsers",JSON.stringify(users));
+}
+
+function saveData() {
+  if(!currentUser)return;
+  localStorage.setItem("mtData_"+currentUser.email,
+    JSON.stringify({
+      name:currentUser.name,
+      transactions,savings,budget
+    }));
+}
+
+function loadData() {
+  const data=JSON.parse(
+    localStorage.getItem("mtData_"+currentUser.email)||"{}"
+  );
+  transactions=data.transactions||[];
+  savings=data.savings||[];
+  budget=Number(data.budget)||0;
+  currentUser.name=data.name||currentUser.name;
+}
+
+$("toggleAuth").addEventListener("click",()=>{
+  registering=!registering;
+  $("authTitle").textContent=registering?"Create account":"Welcome back";
+  $("authButton").textContent=registering?"Register":"Log In";
+  $("toggleAuth").textContent=registering?"Back to Login":"Create demo account";
+  $("authMessage").textContent="";
+});
+
+$("authForm").addEventListener("submit",e=>{
+  e.preventDefault();
+  const email=$("email").value.trim().toLowerCase();
+  const password=$("password").value;
+  const users=getUsers();
+
+  if(registering){
+    if(users.some(u=>u.email===email)){
+      $("authMessage").textContent="Account already exists.";
+      return;
+    }
+    currentUser={email,password,name:email.split("@")[0]};
+    users.push(currentUser);
+    saveUsers(users);
+    loadData();
+    enterApp();
+  }else{
+    const user=users.find(u=>u.email===email&&u.password===password);
+    if(!user){
+      $("authMessage").textContent="Incorrect login details.";
+      return;
+    }
+    currentUser=user;
+    loadData();
+    enterApp();
+  }
+});
+
+function enterApp(){
+  $("authSection").classList.add("hidden");
+  $("appSection").classList.remove("hidden");
+  $("welcomeName").textContent=currentUser.name;
+  $("profileName").value=currentUser.name;
+  $("profileEmail").value=currentUser.email;
+  $("date").value=today();
+  updateDashboard();
+  renderTransactions();
+  showPage("dashboard");
+}
+
+function logout(){
+  saveData();
+  currentUser=null;
+  $("appSection").classList.add("hidden");
+  $("authSection").classList.remove("hidden");
+  $("authForm").reset();
+}
+$("logoutButton").addEventListener("click",logout);
+
+function showPage(name){
+  document.querySelectorAll(".page").forEach(p=>p.classList.add("hidden"));
+  $(name+"Page").classList.remove("hidden");
+  document.querySelectorAll(".nav button").forEach(b=>{
+    b.classList.toggle("active",b.dataset.page===name);
+  });
+  if(name==="reports")updateReports();
+  if(name==="budget")updateBudget();
+  if(name==="savings")renderSavings();
+  if(name==="transactions")renderTransactions();
+}
+
+document.querySelectorAll(".nav button").forEach(button=>{
+  button.addEventListener("click",()=>showPage(button.dataset.page));
+});
+
+function totals(){
+  const income=transactions.filter(t=>t.type==="income")
+    .reduce((s,t)=>s+Number(t.amount),0);
+  const expenses=transactions.filter(t=>t.type==="expense")
+    .reduce((s,t)=>s+Number(t.amount),0);
+  const saved=savings.reduce((s,t)=>s+Number(t.current),0);
+  return {income,expenses,saved,balance:income-expenses};
+}
+
+function updateDashboard(){
+  const t=totals();
+  $("totalIncome").textContent=money(t.income);
+  $("totalExpenses").textContent=money(t.expenses);
+  $("balance").textContent=money(t.balance);
+  $("totalSavings").textContent=money(t.saved);
+
+  $("financialHealth").textContent=t.balance>=0
+    ?"Your recorded income is higher than your expenses."
+    :"Your recorded expenses are higher than your income.";
+
+  const month=today().slice(0,7);
+  const list=transactions.filter(x=>x.date.startsWith(month));
+  const mi=list.filter(x=>x.type==="income")
+    .reduce((s,x)=>s+Number(x.amount),0);
+  const me=list.filter(x=>x.type==="expense")
+    .reduce((s,x)=>s+Number(x.amount),0);
+
+  $("monthlySummary").textContent=
+    `Income: ${money(mi)} | Expenses: ${money(me)} | Net: ${money(mi-me)}`;
+
+  renderRecentActivity();
+  updateBudget();
+}
+
+function renderRecentActivity(){
+  const list=[...transactions]
+    .sort((a,b)=>b.date.localeCompare(a.date))
+    .slice(0,5);
+
+  $("recentActivity").innerHTML=list.length?list.map(t=>`
+    <p>
+      <strong>${escapeHTML(t.category)}</strong>
+      — ${escapeHTML(t.note||"No description")}
+      <span class="${t.type==="income"?"green":"red"}">
+      ${t.type==="income"?"+":"-"}${money(t.amount)}
+      </span>
+    </p>
+  `).join(""):'<p class="empty">No recent activity.</p>';
+}
+
+$("transactionForm").addEventListener("submit",e=>{
+  e.preventDefault();
+  const item={
+    id:editingId||Date.now(),
+    type:$("type").value,
+    amount:Number($("amount").value),
+    category:$("category").value,
+    date:$("date").value,
+    note:$("note").value.trim()
+  };
+
+  if(!item.amount||item.amount<=0)return;
+
+  if(editingId){
+    transactions=transactions.map(t=>t.id===editingId?item:t);
+  }else{
+    transactions.push(item);
+  }
+
+  editingId=null;
+  $("transactionForm").reset();
+  $("date").value=today();
+  $("formTitle").textContent="Add Transaction";
+  saveData();
+  renderTransactions();
+  updateDashboard();
+});
+
+function renderTransactions(){
+  const search=$("search").value.toLowerCase();
+  const type=$("filterType").value;
+  const category=$("filterCategory").value;
+  const from=$("fromDate").value;
+  const to=$("toDate").value;
+
+  const filtered=transactions.filter(t=>
+    (type==="all"||t.type===type)&&
+    (category==="all"||t.category===category)&&
+    (!from||t.date>=from)&&
+    (!to||t.date<=to)&&
+    (t.category+" "+t.note+" "+t.type).toLowerCase().includes(search)
+  );
+
+  $("transactionList").innerHTML=filtered.map(t=>`
+    <tr>
+      <td>${escapeHTML(t.date)}</td>
+      <td>${escapeHTML(t.type)}</td>
+      <td>${escapeHTML(t.category)}</td>
+      <td>${money(t.amount)}</td>
+      <td>${escapeHTML(t.note||"-")}</td>
+      <td>
+        <button class="small" onclick="editTransaction(${t.id})">Edit</button>
+        <button class="small danger" onclick="deleteTransaction(${t.id})">Delete</button>
+      </td>
+    </tr>
+  `).join("");
+
+  $("transactionEmpty").classList.toggle("hidden",filtered.length>0);
+}
+
+["search","filterType","filterCategory","fromDate","toDate"]
+.forEach(id=>$(id).addEventListener("input",renderTransactions));
+
+$("clearFilters").addEventListener("click",()=>{
+  ["search","fromDate","toDate"].forEach(id=>$(id).value="");
+  $("filterType").value="all";
+  $("filterCategory").value="all";
+  renderTransactions();
+});
+
+function editTransaction(id){
+  const t=transactions.find(x=>x.id===id);
+  if(!t)return;
+  editingId=id;
+  $("type").value=t.type;
+  $("amount").value=t.amount;
+  $("category").value=t.category;
+  $("date").value=t.date;
+  $("note").value=t.note;
+  $("formTitle").textContent="Edit Transaction";
+  showPage("transactions");
+}
+
+function deleteTransaction(id){
+  if(!confirm("Delete this transaction?"))return;
+  transactions=transactions.filter(t=>t.id!==id);
+  saveData();
+  renderTransactions();
+  updateDashboard();
+}
+
+$("cancelEdit").addEventListener("click",()=>{
+  editingId=null;
+  $("transactionForm").reset();
+  $("date").value=today();
+  $("formTitle").textContent="Add Transaction";
+});
+
+window.editTransaction=editTransaction;
+window.deleteTransaction=deleteTransaction;
+$("savingsForm").addEventListener("submit",e=>{
+  e.preventDefault();
+  savings.push({
+    id:Date.now(),
+    name:$("savingName").value.trim(),
+    target:Number($("savingTarget").value),
+    current:Number($("savingAmount").value)||0
+  });
+  saveData();
+  $("savingsForm").reset();
+  renderSavings();
+  updateDashboard();
+});
+
+function renderSavings(){
+  $("savingsList").innerHTML=savings.length?savings.map(s=>{
+    const percent=Math.min(100,s.current/s.target*100);
+    return `
+      <div class="card">
+        <h3>${escapeHTML(s.name)}</h3>
+        <p>${money(s.current)} saved of ${money(s.target)}</p>
+        <div class="progress">
+          <div class="progress-fill" style="width:${percent}%"></div>
+        </div>
+        <p>${percent.toFixed(1)}% completed</p>
+        <button onclick="addSaving(${s.id})">Add Money</button>
+        <button class="danger" onclick="removeSaving(${s.id})">Delete</button>
+      </div>`;
+  }).join(""):'<div class="card empty">No savings goals yet.</div>';
+}
+
+function addSaving(id){
+  const s=savings.find(x=>x.id===id);
+  if(!s)return;
+  const amount=Number(prompt("Enter amount to add:"));
+  if(!amount||amount<=0)return;
+  s.current+=amount;
+  saveData();
+  renderSavings();
+  updateDashboard();
+}
+
+function removeSaving(id){
+  if(!confirm("Delete this savings goal?"))return;
+  savings=savings.filter(x=>x.id!==id);
+  saveData();
+  renderSavings();
+  updateDashboard();
+}
+
+window.addSaving=addSaving;
+window.removeSaving=removeSaving;
+
+$("budgetForm").addEventListener("submit",e=>{
+  e.preventDefault();
+  budget=Number($("budgetAmount").value);
+  saveData();
+  updateBudget();
+});
+
+function updateBudget(){
+  $("budgetAmount").value=budget||"";
+  const month=today().slice(0,7);
+  const spent=transactions
+    .filter(t=>t.type==="expense"&&t.date.startsWith(month))
+    .reduce((s,t)=>s+Number(t.amount),0);
+
+  if(!budget){
+    $("budgetStatus").textContent="No budget set.";
+    $("budgetDetails").textContent="";
+    $("budgetProgress").style.width="0%";
+    return;
+  }
+
+  const percent=spent/budget*100;
+  $("budgetStatus").textContent=percent>100
+    ?"You have exceeded your budget."
+    :"You are within your budget.";
+
+  $("budgetDetails").textContent=
+    `${money(spent)} spent. ${money(Math.max(0,budget-spent))} remaining.`;
+
+  $("budgetProgress").style.width=Math.min(100,percent)+"%";
+  $("budgetProgress").style.background=percent>100?"#dc2626":"#16a34a";
+}
+
+function updateReports(){
+  const t=totals();
+  $("reportSummary").textContent=
+    `Income: ${money(t.income)} | Expenses: ${money(t.expenses)} | Balance: ${money(t.balance)}`;
+
+  const categories={};
+  transactions.filter(x=>x.type==="expense").forEach(x=>{
+    categories[x.category]=(categories[x.category]||0)+Number(x.amount);
+  });
+
+  const entries=Object.entries(categories);
+  const max=Math.max(1,...entries.map(x=>x[1]));
+
+  $("categoryChart").innerHTML=entries.length?entries.map(([name,value])=>`
+    <div class="bar-row">
+      <p>${escapeHTML(name)} — ${money(value)}</p>
+      <div class="bar-track">
+        <div class="bar-fill" style="width:${value/max*100}%"></div>
+      </div>
+    </div>
+  `).join(""):'<p>No expense information yet.</p>';
+
+  const total=Math.max(1,t.income,t.expenses);
+
+  $("comparisonChart").innerHTML=`
+    <p>Income: ${money(t.income)}</p>
+    <div class="bar-track">
+      <div class="bar-fill" style="width:${t.income/total*100}%"></div>
+    </div>
+    <p>Expenses: ${money(t.expenses)}</p>
+    <div class="bar-track">
+      <div class="bar-fill" style="width:${t.expenses/total*100}%;background:#dc2626"></div>
+    </div>
+  `;
+}
+
+$("exportButton").addEventListener("click",()=>{
+  const rows=[
+    ["Date","Type","Category","Amount","Description"],
+    ...transactions.map(t=>[
+      t.date,t.type,t.category,t.amount,t.note
+    ])
+  ];
+
+  const csv=rows.map(row=>row.map(value=>
+    '"'+String(value).replace(/"/g,'""')+'"'
+  ).join(",")).join("\n");
+
+  const blob=new Blob([csv],{type:"text/csv"});
+  const url=URL.createObjectURL(blob);
+  const a=document.createElement("a");
+  a.href=url;
+  a.download="MoneyTrack-Transactions.csv";
+  a.click();
+  URL.revokeObjectURL(url);
+});
+
+$("themeButton").addEventListener("click",()=>{
+  document.body.classList.toggle("dark");
+  const dark=document.body.classList.contains("dark");
+  $("themeButton").textContent=dark?"Light mode":"Dark mode";
+  localStorage.setItem("mtTheme",dark?"dark":"light");
+});
+
+if(localStorage.getItem("mtTheme")==="dark"){
+  document.body.classList.add("dark");
+  $("themeButton").textContent="Light mode";
+}
+
+$("notificationButton").addEventListener("click",()=>{
+  $("notificationMessage").textContent=
+    "MoneyTrack demo notification: Check your finances today!";
+  alert("MoneyTrack: Check your finances today!");
+});
+
+$("profileForm").addEventListener("submit",e=>{
+  e.preventDefault();
+  currentUser.name=$("profileName").value.trim();
+
+  const users=getUsers().map(u=>
+    u.email===currentUser.email
+      ?{...u,name:currentUser.name}
+      :u
+  );
+
+  saveUsers(users);
+  saveData();
+  $("welcomeName").textContent=currentUser.name;
+  alert("Profile updated successfully.");
+});
+
+// BACKUP FEATURE
+$("backupButton").addEventListener("click",()=>{
+  const backup={
+    app:"MoneyTrack",
+    version:1,
+    createdAt:new Date().toISOString(),
+    data:{transactions,savings,budget}
+  };
+
+  const blob=new Blob(
+    [JSON.stringify(backup,null,2)],
+    {type:"application/json"}
+  );
+
+  const url=URL.createObjectURL(blob);
+  const a=document.createElement("a");
+  a.href=url;
+  a.download="MoneyTrack-Backup.json";
+  a.click();
+  URL.revokeObjectURL(url);
+});
+
+// RESTORE FEATURE
+$("restoreButton").addEventListener("click",()=>{
+  const file=$("restoreFile").files[0];
+
+  if(!file){
+    alert("Please choose a backup file first.");
+    return;
+  }
+
+  if(!confirm("Restore this backup? Your current demo data will be replaced."))return;
+
+  const reader=new FileReader();
+
+  reader.onload=()=>{
+    try{
+      const backup=JSON.parse(reader.result);
+
+      if(
+        backup.app!=="MoneyTrack"||
+        !backup.data||
+        !Array.isArray(backup.data.transactions)||
+        !Array.isArray(backup.data.savings)||
+        !Number.isFinite(Number(backup.data.budget))
+      ){
+        throw new Error("Invalid backup");
+      }
+
+      transactions=backup.data.transactions;
+      savings=backup.data.savings;
+      budget=Number(backup.data.budget);
+
+      saveData();
+      updateDashboard();
+      renderTransactions();
+      renderSavings();
+      updateReports();
+
+      alert("Backup restored successfully!");
+      $("restoreFile").value="";
+    }catch(error){
+      alert("This backup file is invalid or damaged.");
+    }
+  };
+
+  reader.readAsText(file);
+});
+
+// APPLICATION STARTUP
+$("date").value=today();
+
+if(localStorage.getItem("mtTheme")==="dark"){
+  document.body.classList.add("dark");
+}
+
+</script>
+</body>
+</html>
